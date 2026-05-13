@@ -25,25 +25,13 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
-  background-color: #00174D; /* fallback si la imagen no carga */
-  background-image: url('FONDO-POWERBI_4.png');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: #00174D;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   color: var(--text);
-}
-
-/* En pantallas muy angostas o verticales, mostrar imagen completa sin recortar */
-@media (max-aspect-ratio: 1/1) {
-  body {
-    background-size: contain;
-  }
 }
 
 .container {
@@ -429,7 +417,7 @@ body {
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbwE5peYZz4WfcnXvRMP5TbpCgNx1S7PC1RWm33rJF_OfAglzQ7ciPn-Y_fRaHcnqGTg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxgwgF9vouM44QPHUAn7A_9sG8DezzqTdDOH8ho91LOodfarWLknd9-rCDLTCGyvzsN/exec';
 
 // ============================================
 // ESTADO
