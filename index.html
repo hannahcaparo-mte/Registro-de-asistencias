@@ -5,262 +5,350 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema de Asistencias</title>
 <style>
+:root {
+  --navy: #00174D;
+  --navy-light: #1a2e63;
+  --orange: #F17900;
+  --orange-dark: #d96d00;
+  --gray: #E6E6E6;
+  --gray-dark: #b8b8b8;
+  --text: #1a1a1a;
+  --text-soft: #5a5a5a;
+  --white: #ffffff;
+  --success-bg: #e8f5e9;
+  --success-fg: #1b5e20;
+  --error-bg: #ffebee;
+  --error-fg: #b71c1c;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #00174D; /* fallback si la imagen no carga */
+  background-image: url('FONDO-POWERBI_4.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  color: var(--text);
+}
+
+/* En pantallas muy angostas o verticales, mostrar imagen completa sin recortar */
+@media (max-aspect-ratio: 1/1) {
+  body {
+    background-size: contain;
+  }
 }
 
 .container {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,255,255,0.05);
   width: 100%;
-  max-width: 600px;
+  max-width: 640px;
   overflow: hidden;
+  border: 1px solid rgba(0, 23, 77, 0.08);
+  position: relative;
+  z-index: 1;
 }
 
+/* ============ HEADER ============ */
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--navy);
   color: white;
-  padding: 25px 20px;
+  padding: 22px 28px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
+  border-bottom: 4px solid var(--orange);
 }
 
 .logo {
-  width: 70px;
-  height: 70px;
+  width: 64px;
+  height: 64px;
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
   padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.logo img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
+.logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 .header-text { flex: 1; }
-.header-text h1 { font-size: 22px; font-weight: 700; }
-.header-text p { font-size: 12px; opacity: 0.9; }
-
-.datetime-display { text-align: right; }
-.datetime-display .date { font-size: 14px; font-weight: 600; }
-.datetime-display .time { font-size: 22px; font-weight: 700; margin-top: 3px; }
-
-.content { padding: 35px 30px; }
-
-.form-group { margin-bottom: 22px; }
-
-.form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
+.header-text h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+.header-text p {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
   letter-spacing: 0.5px;
 }
 
-.input-wrapper { display: flex; gap: 10px; }
+.datetime-display { text-align: right; }
+.datetime-display .date {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+  text-transform: capitalize;
+}
+.datetime-display .time {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 2px;
+  color: var(--orange);
+  font-variant-numeric: tabular-nums;
+}
 
-input[type="text"] {
-  flex: 1;
+/* ============ CONTENT ============ */
+.content { padding: 36px 32px 32px; }
+
+#messageContainer { min-height: 0; }
+
+.message {
   padding: 14px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
-  font-family: inherit;
-}
-
-input[type="text"]:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-}
-
-.search-btn {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 14px 22px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.search-btn:hover { background: #5568d3; }
-.search-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-.info-card {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
   margin-bottom: 22px;
-  border-left: 4px solid #667eea;
-  display: none;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.info-card.show {
-  display: block;
-  animation: slideIn 0.3s ease;
+.message.success {
+  background: var(--success-bg);
+  color: var(--success-fg);
+  border-left: 4px solid var(--success-fg);
+}
+
+.message.error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border-left: 4px solid var(--error-fg);
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+/* ============ DNI INPUT STAGE ============ */
+.dni-stage { text-align: center; }
+
+.dni-stage .label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
-.info-row:last-child { margin-bottom: 0; }
+#dniInput {
+  width: 100%;
+  max-width: 360px;
+  padding: 22px 20px;
+  border: 2px solid var(--gray);
+  border-radius: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 8px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--navy);
+  background: #fafafa;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
 
-.info-label {
-  font-size: 11px;
-  color: #666;
-  font-weight: 600;
-  text-transform: uppercase;
+#dniInput::placeholder {
+  color: var(--gray-dark);
+  letter-spacing: 6px;
+  font-weight: 400;
+}
+
+#dniInput:focus {
+  outline: none;
+  border-color: var(--orange);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(241, 121, 0, 0.15);
+}
+
+.dni-stage .hint {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-soft);
   letter-spacing: 0.5px;
 }
 
-.info-value {
-  font-size: 15px;
+.dni-stage .hint strong {
+  color: var(--orange);
   font-weight: 700;
-  color: #333;
-  text-align: right;
+}
+
+/* ============ INFO CARD STAGE ============ */
+.info-stage {
+  display: none;
+  animation: slideIn 0.3s ease;
+}
+
+.info-stage.show { display: block; }
+
+.user-header {
+  text-align: center;
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 2px solid var(--gray);
+}
+
+.user-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.user-dni {
+  font-size: 14px;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.info-item {
+  background: #f7f8fb;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border-left: 3px solid var(--navy);
+}
+
+.info-item.full { grid-column: 1 / -1; }
+
+.info-item .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.info-item .value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
 }
 
 .status-badge {
   display: inline-block;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 16px;
   font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-pagado { background: #e8f5e9; color: #2e7d32; }
-.status-no-pagado { background: #ffebee; color: #c62828; }
-.status-retirado { background: #fff3e0; color: #e65100; }
-.status-unknown { background: #f5f5f5; color: #666; }
-
-.button-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.btn {
-  padding: 13px 18px;
-  border: none;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.status-pagado { background: #d4edda; color: #155724; }
+.status-no-pagado { background: #f8d7da; color: #721c24; }
+.status-retirado { background: #fff3cd; color: #856404; }
+.status-unknown { background: var(--gray); color: var(--text-soft); }
+
+/* ============ ENTER PROMPT ============ */
+.enter-prompt {
+  text-align: center;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
   color: white;
-  grid-column: 1 / -1;
-  padding: 15px;
-  font-size: 14px;
-}
-
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(102,126,234,0.3); }
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.btn-secondary { background: #f0f0f0; color: #333; }
-.btn-secondary:hover { background: #e0e0e0; }
-
-.message {
-  padding: 14px;
   border-radius: 10px;
-  margin-bottom: 18px;
-  font-size: 14px;
-  animation: slideIn 0.3s ease;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  box-shadow: 0 6px 16px rgba(241, 121, 0, 0.3);
+  animation: pulse 1.6s ease-in-out infinite;
 }
 
-.message.success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
-.message.error { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+.enter-prompt .key {
+  display: inline-block;
+  background: white;
+  color: var(--orange-dark);
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin: 0 4px;
+  font-weight: 800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 6px 16px rgba(241, 121, 0, 0.3); }
+  50% { box-shadow: 0 6px 24px rgba(241, 121, 0, 0.55); }
+}
 
 .loading {
   display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(255,255,255,0.3);
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
   border-top-color: white;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.attendance-history {
-  display: none;
-  margin-top: 22px;
-}
-
-.attendance-history.show { display: block; }
-
-.history-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.attendance-record {
-  background: #f9f9f9;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.attendance-time { color: #667eea; font-weight: 600; }
-
+/* ============ FOOTER ============ */
 .footer {
   text-align: center;
   font-size: 11px;
-  color: #999;
-  padding: 12px;
-  background: #f9f9f9;
-  border-top: 1px solid #e0e0e0;
+  color: var(--text-soft);
+  padding: 14px;
+  background: #fafafa;
+  border-top: 1px solid var(--gray);
+  letter-spacing: 0.5px;
 }
 
+/* ============ RESPONSIVE ============ */
 @media (max-width: 480px) {
-  .header { flex-direction: column; text-align: center; padding: 20px 15px; }
+  .header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 16px;
+    gap: 12px;
+  }
   .datetime-display { text-align: center; }
-  .content { padding: 25px 20px; }
-  .button-group { grid-template-columns: 1fr; }
-  .btn-primary { grid-column: 1; }
+  .content { padding: 28px 20px 24px; }
+  #dniInput { font-size: 26px; letter-spacing: 5px; padding: 18px 14px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .user-name { font-size: 19px; }
 }
 </style>
 </head>
@@ -269,7 +357,7 @@ input[type="text"]:focus {
 <div class="container">
   <div class="header">
     <div class="logo">
-      <img src="LOGO.png" alt="Logo" onerror="this.parentElement.innerHTML='<div style=&quot;font-size:30px;color:#667eea;&quot;>📋</div>'">
+      <img src="LOGO.png" alt="Logo" onerror="this.parentElement.innerHTML='<div style=&quot;font-size:30px;color:#00174D;font-weight:700;&quot;>📋</div>'">
     </div>
     <div class="header-text">
       <h1>Asistencias</h1>
@@ -284,52 +372,53 @@ input[type="text"]:focus {
   <div class="content">
     <div id="messageContainer"></div>
 
-    <div class="form-group">
-      <label>Ingrese su DNI</label>
-      <div class="input-wrapper">
-        <input type="text" id="dniInput" placeholder="Ej: 12345678" inputmode="numeric" autofocus>
-        <button class="search-btn" id="searchBtn" onclick="searchDNI()">🔍 Buscar</button>
-      </div>
+    <!-- ETAPA 1: Ingreso de DNI -->
+    <div class="dni-stage" id="dniStage">
+      <span class="label">Ingrese su DNI</span>
+      <input
+        type="text"
+        id="dniInput"
+        placeholder="00000000"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="8"
+        autocomplete="off"
+        autofocus
+      >
+      <p class="hint">8 dígitos · Presione <strong>ENTER</strong> para buscar</p>
     </div>
 
-    <div id="infoCard" class="info-card">
-      <div class="info-row">
-        <span class="info-label">Nombre</span>
-        <span class="info-value" id="nameDisplay">--</span>
+    <!-- ETAPA 2: Información del usuario -->
+    <div class="info-stage" id="infoStage">
+      <div class="user-header">
+        <div class="user-name" id="nameDisplay">--</div>
+        <div class="user-dni">DNI: <span id="dniDisplay">--</span></div>
       </div>
-      <div class="info-row">
-        <span class="info-label">DNI</span>
-        <span class="info-value" id="dniDisplay">--</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Período</span>
-        <span class="info-value" id="periodoDisplay">--</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Programa</span>
-        <span class="info-value" id="programaDisplay">--</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Turno</span>
-        <span class="info-value" id="turnoDisplay">--</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Situación</span>
-        <span class="info-value">
-          <span id="situacionDisplay" class="status-badge status-unknown">--</span>
-        </span>
-      </div>
-    </div>
 
-    <div class="button-group" id="buttonGroup" style="display: none;">
-      <button class="btn btn-secondary" onclick="resetForm()">⟲ Cancelar</button>
-      <button class="btn btn-secondary" onclick="toggleHistory()">📊 Historial</button>
-      <button class="btn btn-primary" id="markBtn" onclick="markAttendance()">✓ Marcar Asistencia</button>
-    </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="label">Período</div>
+          <div class="value" id="periodoDisplay">--</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Turno</div>
+          <div class="value" id="turnoDisplay">--</div>
+        </div>
+        <div class="info-item full">
+          <div class="label">Programa</div>
+          <div class="value" id="programaDisplay">--</div>
+        </div>
+        <div class="info-item full">
+          <div class="label">Situación</div>
+          <div class="value">
+            <span id="situacionDisplay" class="status-badge status-unknown">--</span>
+          </div>
+        </div>
+      </div>
 
-    <div id="attendanceHistory" class="attendance-history">
-      <div class="history-title">🕐 Asistencias de hoy</div>
-      <div id="historyContent"></div>
+      <div class="enter-prompt" id="enterPrompt">
+        Presione <span class="key">ENTER</span> para marcar asistencia
+      </div>
     </div>
   </div>
 
@@ -338,48 +427,58 @@ input[type="text"]:focus {
 
 <script>
 // ============================================
-// CONFIGURACIÓN - Pega aquí tu URL de Apps Script
+// CONFIGURACIÓN
 // ============================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbxgwgF9vouM44QPHUAn7A_9sG8DezzqTdDOH8ho91LOodfarWLknd9-rCDLTCGyvzsN/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwE5peYZz4WfcnXvRMP5TbpCgNx1S7PC1RWm33rJF_OfAglzQ7ciPn-Y_fRaHcnqGTg/exec';
 
+// ============================================
+// ESTADO
 // ============================================
 let currentUser = null;
-let todayAttendances = [];
+let stage = 'dni'; // 'dni' | 'loading' | 'confirm' | 'marking'
 
+const dniInput = document.getElementById('dniInput');
+const dniStage = document.getElementById('dniStage');
+const infoStage = document.getElementById('infoStage');
+const enterPrompt = document.getElementById('enterPrompt');
+
+// ============================================
+// RELOJ
+// ============================================
 function updateDateTime() {
   const now = new Date();
-  document.getElementById('dateDisplay').textContent = 
+  document.getElementById('dateDisplay').textContent =
     now.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-  document.getElementById('timeDisplay').textContent = 
+  document.getElementById('timeDisplay').textContent =
     now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
 // ============================================
-// JSONP - evita problemas de CORS con Apps Script
+// JSONP
 // ============================================
 function jsonp(params) {
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
     const timeoutId = setTimeout(() => {
       cleanup();
-      reject(new Error('Timeout: el servidor no respondió'));
+      reject(new Error('Tiempo de espera agotado'));
     }, 20000);
-    
+
     const script = document.createElement('script');
-    
+
     function cleanup() {
       try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
       if (script && script.parentNode) script.parentNode.removeChild(script);
       clearTimeout(timeoutId);
     }
-    
+
     window[callbackName] = function(data) {
       cleanup();
       resolve(data);
     };
-    
+
     const queryParams = new URLSearchParams({ ...params, callback: callbackName });
     script.src = `${API_URL}?${queryParams.toString()}`;
     script.onerror = () => {
@@ -390,21 +489,69 @@ function jsonp(params) {
   });
 }
 
+// ============================================
+// INPUT: solo números, máximo 8 dígitos
+// ============================================
+dniInput.addEventListener('input', (e) => {
+  // Eliminar todo lo que no sea dígito y limitar a 8
+  const cleaned = e.target.value.replace(/\D/g, '').slice(0, 8);
+  if (cleaned !== e.target.value) {
+    e.target.value = cleaned;
+  }
+});
+
+// Bloquear pegar texto que no sea numérico
+dniInput.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text');
+  const cleaned = text.replace(/\D/g, '').slice(0, 8);
+  dniInput.value = cleaned;
+});
+
+// ============================================
+// LISTENER GLOBAL DE ENTER
+// (maneja ambas etapas — buscar y marcar)
+// ============================================
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+
+  if (stage === 'dni') {
+    e.preventDefault();
+    searchDNI();
+  } else if (stage === 'confirm') {
+    e.preventDefault();
+    markAttendance();
+  }
+  // En 'loading' o 'marking' se ignora
+});
+
+// Mantener foco en el input cuando estamos en etapa DNI
+// (por si el usuario tocara accidentalmente algo)
+document.addEventListener('click', () => {
+  if (stage === 'dni') dniInput.focus();
+});
+
+window.addEventListener('focus', () => {
+  if (stage === 'dni') dniInput.focus();
+});
+
+// ============================================
+// BÚSQUEDA POR DNI
+// ============================================
 async function searchDNI() {
-  const dni = document.getElementById('dniInput').value.trim();
-  if (!dni) {
-    showMessage('Ingrese un DNI', 'error');
+  const dni = dniInput.value.trim();
+
+  // Validación local: debe tener exactamente 8 dígitos
+  if (dni.length !== 8) {
+    showMessage('El DNI debe tener 8 dígitos', 'error');
+    dniInput.value = '';
+    dniInput.focus();
     return;
   }
 
-  if (API_URL.includes('PEGA_AQUI')) {
-    showMessage('⚠️ Falta configurar API_URL', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('searchBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loading"></span> Buscando...';
+  stage = 'loading';
+  dniInput.disabled = true;
+  showLoadingMessage('Buscando...');
 
   try {
     const result = await jsonp({ action: 'search', dni: dni });
@@ -412,32 +559,75 @@ async function searchDNI() {
     if (result.success) {
       currentUser = result.user;
       displayUserInfo(result.user);
-      loadTodayAttendances();
-      document.getElementById('buttonGroup').style.display = 'grid';
+      clearMessage();
+      // Cambiar a etapa de confirmación
+      dniStage.style.display = 'none';
+      infoStage.classList.add('show');
+      stage = 'confirm';
+      dniInput.disabled = false;
     } else {
       showMessage(result.message || 'DNI no encontrado', 'error');
-      resetForm();
+      resetToInputStage();
     }
   } catch (err) {
     showMessage('Error: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🔍 Buscar';
+    resetToInputStage();
   }
 }
 
+// ============================================
+// MARCAR ASISTENCIA
+// ============================================
+async function markAttendance() {
+  if (!currentUser) return;
+
+  stage = 'marking';
+  enterPrompt.innerHTML = '<span class="loading"></span> Registrando asistencia...';
+
+  try {
+    const result = await jsonp({
+      action: 'mark',
+      dni: currentUser.dni,
+      nombre: currentUser.nombre
+    });
+
+    if (result.success) {
+      const hora = (result.attendance && result.attendance.hora) || '';
+      enterPrompt.innerHTML = '✓ Asistencia registrada' + (hora ? ' · ' + hora : '');
+      enterPrompt.style.background = 'linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%)';
+      enterPrompt.style.boxShadow = '0 6px 16px rgba(46,125,50,0.3)';
+      enterPrompt.style.animation = 'none';
+
+      setTimeout(() => {
+        resetToInputStage();
+      }, 1800);
+    } else {
+      showMessage(result.message || 'Error al registrar', 'error');
+      restoreEnterPrompt();
+      stage = 'confirm';
+    }
+  } catch (err) {
+    showMessage('Error: ' + err.message, 'error');
+    restoreEnterPrompt();
+    stage = 'confirm';
+  }
+}
+
+// ============================================
+// UI HELPERS
+// ============================================
 function displayUserInfo(user) {
   document.getElementById('nameDisplay').textContent = user.nombre || '--';
   document.getElementById('dniDisplay').textContent = user.dni || '--';
   document.getElementById('periodoDisplay').textContent = user.periodo || '--';
   document.getElementById('programaDisplay').textContent = user.programa || '--';
   document.getElementById('turnoDisplay').textContent = user.turno || '--';
-  
+
   const sit = (user.situacion || '').toString().toUpperCase().trim();
   const sitEl = document.getElementById('situacionDisplay');
   sitEl.textContent = sit || 'DESCONOCIDO';
   sitEl.className = 'status-badge';
-  
+
   if (sit.includes('NO') && sit.includes('PAG')) {
     sitEl.classList.add('status-no-pagado');
   } else if (sit.includes('PAGAD')) {
@@ -447,94 +637,47 @@ function displayUserInfo(user) {
   } else {
     sitEl.classList.add('status-unknown');
   }
-  
-  document.getElementById('infoCard').classList.add('show');
 }
 
-async function markAttendance() {
-  if (!currentUser) return;
-
-  const btn = document.getElementById('markBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loading"></span> Registrando...';
-
-  try {
-    const result = await jsonp({
-      action: 'mark',
-      dni: currentUser.dni,
-      nombre: currentUser.nombre
-    });
-    
-    if (result.success) {
-      showMessage('✓ Asistencia registrada', 'success');
-      const hora = (result.attendance && result.attendance.hora) || new Date().toLocaleTimeString('es-ES', { hour12: false });
-      todayAttendances.unshift({ nombre: currentUser.nombre, hora: hora });
-      updateHistoryDisplay();
-      setTimeout(resetForm, 1500);
-    } else {
-      showMessage(result.message || 'Error al registrar', 'error');
-      btn.disabled = false;
-      btn.innerHTML = '✓ Marcar Asistencia';
-    }
-  } catch (err) {
-    showMessage('Error: ' + err.message, 'error');
-    btn.disabled = false;
-    btn.innerHTML = '✓ Marcar Asistencia';
-  }
+function restoreEnterPrompt() {
+  enterPrompt.innerHTML = 'Presione <span class="key">ENTER</span> para marcar asistencia';
+  enterPrompt.style.background = '';
+  enterPrompt.style.boxShadow = '';
+  enterPrompt.style.animation = '';
 }
 
-async function loadTodayAttendances() {
-  try {
-    const result = await jsonp({ action: 'today' });
-    if (result.success) {
-      todayAttendances = result.attendances || [];
-      updateHistoryDisplay();
-    }
-  } catch (err) {
-    // silent
-  }
-}
-
-function updateHistoryDisplay() {
-  const c = document.getElementById('historyContent');
-  if (todayAttendances.length === 0) {
-    c.innerHTML = '<p style="color:#999;font-size:13px;">Sin asistencias hoy</p>';
-    return;
-  }
-  c.innerHTML = todayAttendances.map(a => 
-    `<div class="attendance-record"><span>${a.nombre}</span><span class="attendance-time">${a.hora}</span></div>`
-  ).join('');
-}
-
-function toggleHistory() {
-  document.getElementById('attendanceHistory').classList.toggle('show');
+function resetToInputStage() {
+  currentUser = null;
+  stage = 'dni';
+  dniInput.disabled = false;
+  dniInput.value = '';
+  infoStage.classList.remove('show');
+  dniStage.style.display = 'block';
+  restoreEnterPrompt();
+  dniInput.focus();
 }
 
 function showMessage(text, type) {
   const c = document.getElementById('messageContainer');
   c.innerHTML = `<div class="message ${type}">${text}</div>`;
   if (type === 'success') {
-    setTimeout(() => c.innerHTML = '', 3000);
+    setTimeout(() => { if (c.firstChild) c.innerHTML = ''; }, 3000);
+  } else {
+    setTimeout(() => { if (c.firstChild) c.innerHTML = ''; }, 4000);
   }
 }
 
-function resetForm() {
-  document.getElementById('dniInput').value = '';
-  document.getElementById('dniInput').focus();
-  document.getElementById('infoCard').classList.remove('show');
-  document.getElementById('buttonGroup').style.display = 'none';
-  document.getElementById('attendanceHistory').classList.remove('show');
-  document.getElementById('messageContainer').innerHTML = '';
-  currentUser = null;
-  
-  const btn = document.getElementById('markBtn');
-  btn.disabled = false;
-  btn.innerHTML = '✓ Marcar Asistencia';
+function showLoadingMessage(text) {
+  const c = document.getElementById('messageContainer');
+  c.innerHTML = `<div class="message success" style="background:#e3f2fd;color:#0d47a1;border-left-color:#0d47a1;"><span class="loading" style="border-top-color:#0d47a1;"></span> ${text}</div>`;
 }
 
-document.getElementById('dniInput').addEventListener('keypress', e => {
-  if (e.key === 'Enter') searchDNI();
-});
+function clearMessage() {
+  document.getElementById('messageContainer').innerHTML = '';
+}
+
+// Foco inicial
+dniInput.focus();
 </script>
 
 </body>
